@@ -29,6 +29,7 @@ module FluentPluginKinesis
     PUT_RECORDS_MAX_COUNT = 500
     PUT_RECORD_MAX_DATA_SIZE = 1024 * 50
     PUT_RECORDS_MAX_DATA_SIZE = 1024 * 1024 * 5
+    RECORDS_SEPARATOR = "\n"
 
     Fluent::Plugin.register_output('kinesis',self)
 
@@ -48,6 +49,8 @@ module FluentPluginKinesis
     config_param :explicit_hash_key,      :string, default: nil
     config_param :explicit_hash_key_expr, :string, default: nil
     config_param :order_events,           :bool,   default: false
+    config_param :multi_records_per_put,  :bool,   default: true
+    config_param :multi_records_separator, :string, default: RECORDS_SEPARATOR
     config_param :retries_on_putrecords,  :integer, default: 3
 
     config_param :debug, :bool, default: false
@@ -125,10 +128,15 @@ module FluentPluginKinesis
       if @order_events
         put_record_for_order_events(data_list)
       else
-        records_array = build_records_array_to_put(data_list)
-        records_array.each{|records|
+        if @multi_records_per_put
+          records = build_records_by_partition_key(data_list)
           put_records_with_retry(records)
-        }
+        else
+          records_array = build_records_array_to_put(data_list)
+          records_array.each{|records|
+            put_records_with_retry(records)
+          }
+        end
       end
     end
 
@@ -232,6 +240,18 @@ module FluentPluginKinesis
       }
       records_array.push(records)
       records_array
+    end
+
+    def build_records_by_partition_key(data_list)
+      record_array = []
+      data_list.group_by{|d| d[:partition_key]}.each_value { |d_list|
+        record_list = d_list.map{|record| record[:data]}
+        data_to_put = d_list.shift
+        data_to_put[:data] = record_list.join(@multi_records_separator)
+        record_array.push(data_to_put)
+      }
+
+      record_array
     end
 
     def put_records_with_retry(records,retry_count=0)
