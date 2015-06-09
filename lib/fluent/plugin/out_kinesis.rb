@@ -29,7 +29,7 @@ module FluentPluginKinesis
     PUT_RECORDS_MAX_COUNT = 500
     PUT_RECORD_MAX_DATA_SIZE = 1024 * 50
     PUT_RECORDS_MAX_DATA_SIZE = 1024 * 1024 * 5
-    RECORDS_SEPARATOR = "\n"
+    RECORDS_SEPARATOR = "\v"
 
     Fluent::Plugin.register_output('kinesis',self)
 
@@ -49,7 +49,7 @@ module FluentPluginKinesis
     config_param :explicit_hash_key,      :string, default: nil
     config_param :explicit_hash_key_expr, :string, default: nil
     config_param :order_events,           :bool,   default: false
-    config_param :multi_records_per_put,  :bool,   default: true
+    config_param :multi_records_per_put,  :bool,   default: false
     config_param :multi_records_separator, :string, default: RECORDS_SEPARATOR
     config_param :retries_on_putrecords,  :integer, default: 3
 

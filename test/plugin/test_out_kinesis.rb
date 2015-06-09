@@ -115,8 +115,8 @@ class KinesisOutputTest < Test::Unit::TestCase
     ]
     d = create_driver(conf)
     assert_equal(false, d.instance.order_events)
-    assert_equal(true, d.instance.multi_records_per_put)
-    assert_equal("\n", d.instance.multi_records_separator)
+    assert_equal(false, d.instance.multi_records_per_put)
+    assert_equal("\v", d.instance.multi_records_separator)
     assert_equal(true, d.instance.instance_variable_get(:@parallel_mode))
 
     conf = %[
@@ -135,7 +135,7 @@ class KinesisOutputTest < Test::Unit::TestCase
       partition_key test_partition_key
       order_events true
       multi_records_per_put false
-      multi_records_separator "\v"
+      multi_records_separator "#{11.chr}"
       detach_process 1
       num_threads 2
     ]
