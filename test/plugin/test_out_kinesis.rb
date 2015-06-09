@@ -389,6 +389,27 @@ class KinesisOutputTest < Test::Unit::TestCase
     )
   end
 
+  def test_build_records_by_partition_key
+    d = create_driver
+
+    data_list = []
+    (1..500).each do |n|
+      data_list.push({data: n.to_s, partition_key: (n % 3).to_s})
+    end
+    result = d.instance.send(:build_records_by_partition_key,data_list)
+    partition_keys = result.map{|r| r[:partition_key]}.sort
+    assert_equal(partition_keys, ["0", "1", "2"])
+    array0_data_all = result.find{|r| r[:partition_key] == "0"}[:data]
+    assert_instance_of(String, array0_data_all)
+    assert_includes(array0_data_all, d.instance.multi_records_separator)
+    array0_size = array0_data_all.split(d.instance.multi_records_separator).size
+    assert_equal(array0_size, 166)
+    array1_size = result.find{|r| r[:partition_key] == "1"}[:data].split(d.instance.multi_records_separator).size
+    assert_equal(array1_size, 167)
+    array2_size = result.find{|r| r[:partition_key] == "2"}[:data].split(d.instance.multi_records_separator).size
+    assert_equal(array2_size, 167)
+  end
+
   def test_build_data_to_put
     d = create_driver
     assert_equal(
