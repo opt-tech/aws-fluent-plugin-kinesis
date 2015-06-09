@@ -155,6 +155,16 @@ according to arrival of events. Without this, events will be coarsely ordered
 based on arrival time. For detail,
 see [Using the Amazon Kinesis Service API](http://docs.aws.amazon.com/kinesis/latest/dev/kinesis-using-api-java.html#kinesis-using-api-defn-sequence-number).
 
+### multi_records_per_put
+Boolean. Default is true. By enabling it, you can group multiple records by partition_key. While when *random_partition_key* is enabled, all the records will be gathered together into one record, not grouped by partition_key . This feature is used to save money by descrising the number of kinesis put.
+
+### multi_records_separator
+String. Default is '\n'. Yan can change by
+```
+multi_records_separator '\v'
+```
+
+
 Please note that if you set *detach_process* or *num_threads greater than 1*,
 this option will be ignored.
 
