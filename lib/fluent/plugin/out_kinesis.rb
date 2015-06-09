@@ -244,12 +244,20 @@ module FluentPluginKinesis
 
     def build_records_by_partition_key(data_list)
       record_array = []
-      data_list.group_by{|d| d[:partition_key]}.each_value { |d_list|
-        record_list = d_list.map{|record| record[:data]}
-        data_to_put = d_list.shift
+
+      if @random_partition_key
+        record_list = data_list.map{|record| record[:data]}
+        data_to_put = data_list[0].dup
         data_to_put[:data] = record_list.join(@multi_records_separator)
         record_array.push(data_to_put)
-      }
+      else
+        data_list.group_by{|d| d[:partition_key]}.each_value { |d_list|
+          record_list = d_list.map{|record| record[:data]}
+          data_to_put = d_list[0].dup
+          data_to_put[:data] = record_list.join(@multi_records_separator)
+          record_array.push(data_to_put)
+        }
+      end
 
       record_array
     end

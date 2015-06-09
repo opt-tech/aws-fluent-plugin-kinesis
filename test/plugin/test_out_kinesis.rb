@@ -403,11 +403,23 @@ class KinesisOutputTest < Test::Unit::TestCase
     assert_instance_of(String, array0_data_all)
     assert_includes(array0_data_all, d.instance.multi_records_separator)
     array0_size = array0_data_all.split(d.instance.multi_records_separator).size
-    assert_equal(array0_size, 166)
+    assert_equal(166, array0_size)
     array1_size = result.find{|r| r[:partition_key] == "1"}[:data].split(d.instance.multi_records_separator).size
-    assert_equal(array1_size, 167)
+    assert_equal(167, array1_size)
     array2_size = result.find{|r| r[:partition_key] == "2"}[:data].split(d.instance.multi_records_separator).size
-    assert_equal(array2_size, 167)
+    assert_equal(167, array2_size)
+
+    d = create_driver(%[
+      random_partition_key true
+      partition_key test_key
+      stream_name test_stream
+      region us-east-1'
+    ])
+    result = d.instance.send(:build_records_by_partition_key,data_list)
+    assert_equal(1, result.size)
+    assert_equal(data_list[0][:partition_key], result[0][:partition_key])
+    data_array_size = result[0][:data].split(d.instance.multi_records_separator).size
+    assert_equal(data_list.size, data_array_size)
   end
 
   def test_build_data_to_put
