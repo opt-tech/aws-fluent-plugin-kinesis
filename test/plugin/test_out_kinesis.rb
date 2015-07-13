@@ -24,6 +24,7 @@ class KinesisOutputTest < Test::Unit::TestCase
     stream_name test_stream
     region us-east-1
     partition_key test_partition_key
+    endpoint test_endpoint
   ]
 
   def create_driver(conf = CONFIG, tag='test')
@@ -44,6 +45,7 @@ class KinesisOutputTest < Test::Unit::TestCase
     assert_equal 'test_stream', d.instance.stream_name
     assert_equal 'us-east-1', d.instance.region
     assert_equal 'test_partition_key', d.instance.partition_key
+    assert_equal 'test_endpoint', d.instance.endpoint
   end
 
   def test_configure_with_more_options
