@@ -17,7 +17,6 @@ require 'logger'
 require 'securerandom'
 require 'fluent/plugin/version'
 
-
 module FluentPluginKinesis
   class OutputFilter < Fluent::BufferedOutput
 
