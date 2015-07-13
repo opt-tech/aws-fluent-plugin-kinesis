@@ -17,6 +17,35 @@ require 'logger'
 require 'securerandom'
 require 'fluent/plugin/version'
 
+module Aws
+  module Plugins
+    class OverrideEndpoint < Seahorse::Client::Plugin
+      def initialize(endpoint)
+        @endpoint = endpoint
+      end
+
+      option(:endpoint) do |cfg|
+        @endpoint
+      end
+
+    end
+  end
+  class Client < Seahorse::Client::Base
+    class << self
+      alias_method :old_define, :define
+      def define(svc_name, options)
+        client_class = old_define(svc_name, options)
+
+        if endpoint = options[:endpoint]
+          client_class.add_plugin(Plugins::Override.new(endpoint))
+        end
+        client_class
+      end
+    end
+  end
+end
+
+
 module FluentPluginKinesis
   class OutputFilter < Fluent::BufferedOutput
 
@@ -56,6 +85,7 @@ module FluentPluginKinesis
     config_param :debug, :bool, default: false
 
     config_param :http_proxy, :string, default: nil
+    config_param :endpoint, :string, default: nil
 
     def configure(conf)
       super
@@ -179,8 +209,11 @@ module FluentPluginKinesis
         options[:http_proxy] = @http_proxy
       end
 
-      @client = Aws::Kinesis::Client.new(options)
+      if @endpoint
+        options[:endpoint] = @endpoint
+      end
 
+      @client = Aws::Kinesis::Client.new(options)
     end
 
     def check_connection_to_stream
