@@ -56,6 +56,7 @@ module FluentPluginKinesis
     config_param :debug, :bool, default: false
 
     config_param :http_proxy, :string, default: nil
+    config_param :endpoint, :string, default: nil
 
     def configure(conf)
       super
@@ -179,8 +180,11 @@ module FluentPluginKinesis
         options[:http_proxy] = @http_proxy
       end
 
-      @client = Aws::Kinesis::Client.new(options)
+      if @endpoint
+        options[:endpoint] = @endpoint
+      end
 
+      @client = Aws::Kinesis::Client.new(options)
     end
 
     def check_connection_to_stream
