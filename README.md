@@ -112,6 +112,11 @@ for supported regions.
 Proxy server, if any.
 It should be in form like "http://squid:3128/"
 
+### endpoint
+
+Default endpoint is aws. But you can specify the endpoint directly.
+For example, you can connect to local endpoint, such as [Kinesalite](https://github.com/mhart/kinesalite).
+
 ### random_partition_key
 
 Boolean. If true, the plugin uses randomly generated
