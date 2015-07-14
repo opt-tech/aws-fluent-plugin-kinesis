@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.3.3-rc
+
+- **multi_records_per_put support**: Added support multiple rows of data in single put.
+- **multi_records_separator support**: separator
+- **endpoint support**: Added support local endpoint.
+
 ## 0.3.2
 
 - **http_proxy support**: Added HTTP proxy support.
